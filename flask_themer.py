@@ -77,7 +77,7 @@ class FileSystemThemeLoader(ThemeLoader):
 
 
 class Themer:
-    def __init__(self, *, app=None, loaders=None):
+    def __init__(self, app=None, *, loaders=None):
         self.loaders = []
         self.themes = {}
         self._theme_resolver = None
