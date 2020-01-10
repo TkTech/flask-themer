@@ -86,7 +86,7 @@ themer = Themer(app, loaders=[
 ## Using Themes From Templates
 
 Two template globals are added once Flask-Themer is setup, `theme()` and
-`theme_static` (just like flask-themes). These methods look up the currently
+`theme_static()` (just like flask-themes). These methods look up the currently
 active theme and look for the given path in that theme, returning a special
 path that Jinja can use to load it.
 
@@ -103,17 +103,16 @@ path that Jinja can use to load it.
 
 _Theme_ loaders are the mechanism by which Flask-Themer discovers what themes
 are available. You can create a custom loader to get themes from a ZIP file, or
-a database for example. Usually if you create a new ThemeLoader you'll also
-need to create a new Jinja _template_ loader so jinja knows how to read
-individual templates. Lets do a very minimal example that loads just a single
-theme from a ZIP file.
+a database for example. Usually if you create a new `ThemeLoader` you'll also
+need to create a new Jinja [_template_ loader][loader] so Jinja knows how to
+read individual templates. Lets do a very minimal example that loads just a
+single theme from a ZIP file.
 
 
 ```python
 from zipfile import ZipFile
 from flask_themer import ThemeLoader, Theme
 from jinja2.loaders import BaseLoader, TemplateNotFound
-
 
 class ZipFileTemplateLoader(BaseLoader):
     def __init__(self, *args, archive, **kwargs):
@@ -122,7 +121,7 @@ class ZipFileTemplateLoader(BaseLoader):
 
     def get_source(self, environment, template):
         try:
-            return self.archive.read(template)
+            return (self.archive.read(template), None, False)
         except KeyError:
             raise TemplateNotFound(template)
 
@@ -159,3 +158,4 @@ database.
 [flask-themes]: https://github.com/maxcountryman/flask-themes
 [pypi]: https://pypi.org/
 [semver]: https://semver.org/
+[loader]: https://jinja.palletsprojects.com/en/latest/api/#loaders
