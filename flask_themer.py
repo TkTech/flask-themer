@@ -4,7 +4,8 @@ from dataclasses import dataclass
 
 from flask import render_template as flask_render_template
 from flask import current_app, Blueprint, url_for, send_from_directory, abort
-from jinja2.loaders import BaseLoader, TemplateNotFound, FileSystemLoader
+from jinja2 import TemplateNotFound
+from jinja2.loaders import BaseLoader, FileSystemLoader
 
 
 #: The key under which the extension instance will be saved under the flask
@@ -197,7 +198,9 @@ theme_blueprint = Blueprint(
     f'{MAGIC_PATH_PREFIX}',
     __name__
 )
-theme_blueprint.jinja_loader = _ThemeTemplateLoader()
+# Need to use setattr to shut up mypy, see:
+# https://github.com/python/mypy/issues/2427
+setattr(theme_blueprint, 'jinja_loader', _ThemeTemplateLoader())
 
 
 @theme_blueprint.route('/static/<theme>/<path:filename>', endpoint='static')
