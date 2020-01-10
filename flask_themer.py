@@ -33,7 +33,6 @@ def _current_themer():
 class Theme:
     theme_loader: 'ThemeLoader'
     jinja_loader: BaseLoader
-    path: str
     name: str
 
 
@@ -65,8 +64,7 @@ class FileSystemThemeLoader(ThemeLoader):
                     themes[name] = Theme(
                         jinja_loader=FileSystemLoader(path),
                         theme_loader=self,
-                        name=name,
-                        path=path
+                        name=name
                     )
 
         return themes
@@ -88,6 +86,8 @@ class Themer:
             self.init_app(app, loaders=loaders)
 
     def init_app(self, app, *, loaders=None):
+        """Configure `app` to work with Flask-Themer and pre-populate the
+        list of themes we know about."""
         app.extensions[EXTENSION_KEY] = self
 
         default_dir = app.config.setdefault(
@@ -198,6 +198,7 @@ theme_blueprint = Blueprint(
     __name__
 )
 theme_blueprint.jinja_loader = _ThemeTemplateLoader()
+
 
 @theme_blueprint.route('/static/<theme>/<path:filename>', endpoint='static')
 def serve_static(theme, filename):
