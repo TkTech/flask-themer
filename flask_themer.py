@@ -1,8 +1,9 @@
 import os
 import os.path
+from dataclasses import dataclass
 
 from flask import render_template as flask_render_template
-from flask import current_app, Blueprint
+from flask import current_app, Blueprint, url_for, send_from_directory, abort
 from jinja2.loaders import BaseLoader, TemplateNotFound, FileSystemLoader
 
 
@@ -28,8 +29,25 @@ def _current_themer():
         )
 
 
+@dataclass
+class Theme:
+    theme_loader: 'ThemeLoader'
+    jinja_loader: BaseLoader
+    path: str
+    name: str
+
+
 class ThemeLoader:
     def themes(self):
+        """
+        Return a dict mapping theme names to `Theme` instances.
+        """
+        raise NotImplementedError
+
+    def get_static(self, theme, path):
+        """
+        Return a static asset for the given theme and path.
+        """
         raise NotImplementedError
 
 
@@ -44,8 +62,20 @@ class FileSystemThemeLoader(ThemeLoader):
             for name in os.listdir(self.path):
                 path = os.path.join(self.path, name)
                 if os.path.isdir(path):
-                    themes[name] = FileSystemLoader(path)
+                    themes[name] = Theme(
+                        jinja_loader=FileSystemLoader(path),
+                        theme_loader=self,
+                        name=name,
+                        path=path
+                    )
+
         return themes
+
+    def get_static(self, theme, path):
+        return send_from_directory(
+            os.path.join(self.path, theme, 'static'),
+            path
+        )
 
 
 class Themer:
@@ -66,6 +96,7 @@ class Themer:
         )
 
         app.add_template_global(lookup_theme_path, name='theme')
+        app.add_template_global(lookup_static_theme_path, name='theme_static')
         app.register_blueprint(theme_blueprint)
 
         self.loaders = loaders or [
@@ -120,6 +151,16 @@ def lookup_theme_path(path):
     return f'{MAGIC_PATH_PREFIX}/{themer.current_theme}/{path}'
 
 
+def lookup_static_theme_path(path, **kwargs):
+    themer = _current_themer()
+    return url_for(
+        f'{MAGIC_PATH_PREFIX}.static',
+        theme=themer.current_theme,
+        filename=path,
+        **kwargs
+    )
+
+
 class _ThemeTemplateLoader(BaseLoader):
     """
     Flask provides two mechanisms for replacing the jinja loader,
@@ -144,7 +185,7 @@ class _ThemeTemplateLoader(BaseLoader):
 
         themer = _current_themer()
         if theme in themer.themes:
-            return themer.themes[theme].get_source(
+            return themer.themes[theme].jinja_loader.get_source(
                 environment,
                 path
             )
@@ -154,7 +195,17 @@ class _ThemeTemplateLoader(BaseLoader):
 
 theme_blueprint = Blueprint(
     f'{MAGIC_PATH_PREFIX}',
-    __name__,
-    url_prefix=f'/{MAGIC_PATH_PREFIX}'
+    __name__
 )
 theme_blueprint.jinja_loader = _ThemeTemplateLoader()
+
+@theme_blueprint.route('/static/<theme>/<path:filename>', endpoint='static')
+def serve_static(theme, filename):
+    themer = _current_themer()
+
+    try:
+        t = themer.themes[theme]
+    except KeyError:
+        abort(404)
+
+    return t.theme_loader.get_static(theme, filename)
