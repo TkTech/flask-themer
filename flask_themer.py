@@ -1,7 +1,6 @@
-import os
-import os.path
+from pathlib import Path
 from dataclasses import dataclass, field
-from typing import Iterable
+from typing import Iterable, Callable, Union
 
 from flask import render_template as flask_render_template
 from flask import current_app, Blueprint, url_for, send_from_directory, abort
@@ -18,6 +17,14 @@ CONFIG_PREFIX = 'THEMER_'
 #: The presence of this value is what's used to decide if theming should handle
 #: a template lookup. By default, it's a unicode snowman.
 MAGIC_PATH_PREFIX = '\u2603'
+
+
+class ThemeError(Exception):
+    pass
+
+
+class NoThemeResolver(ThemeError):
+    pass
 
 
 @dataclass
@@ -52,29 +59,32 @@ class FileSystemThemeLoader(ThemeLoader):
     """A simple theme loader that assumes all sub-directories immediately under
     `path` are themes.
     """
-    def __init__(self, path):
+    def __init__(self, path: Union[Path, str],
+                 filter: Callable[[Path], bool] = None):
         #: The path the loader is searching for themes.
-        self.path = path
+        self.path = Path(path)
+        self._filter = filter
 
     def themes(self):
         themes = {}
-        if os.path.exists(self.path):
-            for name in os.listdir(self.path):
-                path = os.path.join(self.path, name)
-                if os.path.isdir(path):
-                    themes[name] = Theme(
-                        jinja_loader=FileSystemLoader(path),
-                        theme_loader=self,
-                        name=name
-                    )
+        if self.path.exists():
+            for child in self.path.iterdir():
+                if not child.is_dir():
+                    continue
+
+                if self._filter and not self._filter(child):
+                    continue
+
+                themes[child.name] = Theme(
+                    jinja_loader=FileSystemLoader(str(child)),
+                    theme_loader=self,
+                    name=child.name
+                )
 
         return themes
 
     def get_static(self, theme, path):
-        return send_from_directory(
-            os.path.join(self.path, theme, 'static'),
-            path
-        )
+        return send_from_directory(self.path / theme / 'static', path)
 
 
 class Themer:
@@ -101,10 +111,7 @@ class Themer:
         app.register_blueprint(theme_blueprint)
 
         self.loaders = loaders or [
-            FileSystemThemeLoader(os.path.join(
-                app.root_path,
-                default_dir
-            ))
+            FileSystemThemeLoader(Path(app.root_path) / default_dir)
         ]
 
         for loader in self.loaders:
@@ -129,7 +136,7 @@ class Themer:
     def current_theme(self):
         """The currently active theme."""
         if not self._theme_resolver:
-            raise RuntimeError(
+            raise NoThemeResolver(
                 'No current theme resolver is registered, set one using '
                 'current_theme_loader.'
             )
@@ -144,7 +151,7 @@ def render_template(path, *args, **kwargs):
     try:
         return flask_render_template(lookup_theme_path(path), *args, **kwargs)
     except TemplateNotFound:
-        return render_template(path, *args, **kwargs)
+        return flask_render_template(path, *args, **kwargs)
 
 
 def lookup_theme_path(path):
