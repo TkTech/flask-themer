@@ -7,14 +7,14 @@ from flask_themer import (
     EXTENSION_KEY,
     MAGIC_PATH_PREFIX,
     render_template,
-    NoThemeResolver
+    NoThemeResolver,
+    ThemerNotInitialized
 )
 
 
 @pytest.fixture
 def app():
     app = Flask('testing')
-    # Needed to generate urls without a request context.
     app.config['SERVER_NAME'] = 'testing'
 
     Themer(app, loaders=[])
@@ -50,3 +50,11 @@ def test_no_resolver(app):
 
     with pytest.raises(TemplateNotFound):
         assert render_template('test.html')
+
+
+def test_not_setup():
+    """Ensure we provide a useful error when init_app() hasn't been used."""
+    app = Flask('testing')
+    with app.app_context():
+        with pytest.raises(ThemerNotInitialized):
+            render_template('test.html')

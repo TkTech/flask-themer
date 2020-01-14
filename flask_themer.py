@@ -27,6 +27,10 @@ class NoThemeResolver(ThemeError):
     pass
 
 
+class ThemerNotInitialized(ThemeError, RuntimeError):
+    pass
+
+
 @dataclass
 class Theme:
     #: The `ThemeLoader` instance that created the Theme.
@@ -48,7 +52,7 @@ class ThemeLoader:
         """
         raise NotImplementedError
 
-    def get_static(self, theme, path) -> bytes:
+    def get_static(self, theme: str, path: str) -> bytes:
         """
         Return a static asset for the given theme and path.
         """
@@ -177,7 +181,7 @@ def _current_themer() -> Themer:
     try:
         return current_app.extensions[EXTENSION_KEY]
     except KeyError:
-        raise RuntimeError(
+        raise ThemerNotInitialized(
             'Trying to use an uninitalized Themer, make sure you '
             'call init_app'
         )
@@ -231,6 +235,7 @@ def serve_static(theme, filename):
     try:
         t = themer.themes[theme]
     except KeyError:
+        print('hmm')
         abort(404)
 
     return t.theme_loader.get_static(theme, filename)

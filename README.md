@@ -1,5 +1,6 @@
 ![PyPI](https://img.shields.io/pypi/v/flask-themer?style=flat-square)
 ![PyPI - License](https://img.shields.io/pypi/l/flask-themer?style=flat-square)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/tktech/flask-themer/test?style=flat-square)
 
 
 # Flask-Themer
@@ -13,6 +14,8 @@ flask-themes and does not seek to be. Flask-Themer tries to have little opinion
 on how you actually structure your project and its themes.
 
 Flask-Themer releases follow [Semantic Versioning][semver].
+Flask-Themer has 100% test coverage and considers it an error to fall below
+100%.
 
 ## Installation
 

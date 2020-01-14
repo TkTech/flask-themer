@@ -17,7 +17,8 @@ setup(
         'flask'
     ],
     tests_require=[
-        'pytest'
+        'pytest',
+        'pytest-cov'
     ],
     classifiers=[
         "Programming Language :: Python :: 3",

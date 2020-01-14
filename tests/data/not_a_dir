@@ -1,0 +1,1 @@
+Ensures files do not get processed as themes by the FileSystemThemeLoader.
