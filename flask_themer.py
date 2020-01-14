@@ -1,6 +1,7 @@
 import os
 import os.path
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import Iterable
 
 from flask import render_template as flask_render_template
 from flask import current_app, Blueprint, url_for, send_from_directory, abort
@@ -19,32 +20,28 @@ CONFIG_PREFIX = 'THEMER_'
 MAGIC_PATH_PREFIX = '\u2603'
 
 
-def _current_themer():
-    """Returns the currently active Themer instance."""
-    try:
-        return current_app.extensions[EXTENSION_KEY]
-    except KeyError:
-        raise RuntimeError(
-            'Trying to use an uninitalized Themer, make sure you '
-            'call init_app'
-        )
-
-
 @dataclass
 class Theme:
+    #: The `ThemeLoader` instance that created the Theme.
     theme_loader: 'ThemeLoader'
+    #: A Jinja2 BaseLoader subclass that can load a template from the theme.
     jinja_loader: BaseLoader
+    #: The name of the theme.
     name: str
+    #: Any extra data for this theme. ThemeLoader implementers are free to use
+    #: this in any way they want. For example, reading a YAML file with
+    #: metadata and storing it here.
+    data: dict = field(default_factory=dict)
 
 
 class ThemeLoader:
-    def themes(self):
+    def themes(self) -> Iterable[Theme]:
         """
         Return a dict mapping theme names to `Theme` instances.
         """
         raise NotImplementedError
 
-    def get_static(self, theme, path):
+    def get_static(self, theme, path) -> bytes:
         """
         Return a static asset for the given theme and path.
         """
@@ -52,8 +49,11 @@ class ThemeLoader:
 
 
 class FileSystemThemeLoader(ThemeLoader):
-    def __init__(self, app, path):
-        self.app = app
+    """A simple theme loader that assumes all sub-directories immediately under
+    `path` are themes.
+    """
+    def __init__(self, path):
+        #: The path the loader is searching for themes.
         self.path = path
 
     def themes(self):
@@ -101,7 +101,7 @@ class Themer:
         app.register_blueprint(theme_blueprint)
 
         self.loaders = loaders or [
-            FileSystemThemeLoader(app, os.path.join(
+            FileSystemThemeLoader(os.path.join(
                 app.root_path,
                 default_dir
             ))
@@ -141,7 +141,10 @@ def render_template(path, *args, **kwargs):
     """Identical to flask's render_template, but loads from the active theme if
     one is available.
     """
-    return flask_render_template(lookup_theme_path(path), *args, **kwargs)
+    try:
+        return flask_render_template(lookup_theme_path(path), *args, **kwargs)
+    except TemplateNotFound:
+        return render_template(path, *args, **kwargs)
 
 
 def lookup_theme_path(path):
@@ -160,6 +163,17 @@ def lookup_static_theme_path(path, **kwargs):
         filename=path,
         **kwargs
     )
+
+
+def _current_themer() -> Themer:
+    """Returns the currently active Themer instance."""
+    try:
+        return current_app.extensions[EXTENSION_KEY]
+    except KeyError:
+        raise RuntimeError(
+            'Trying to use an uninitalized Themer, make sure you '
+            'call init_app'
+        )
 
 
 class _ThemeTemplateLoader(BaseLoader):
