@@ -36,9 +36,6 @@ def test_fallback(app):
     """Ensure we fall back to the Flask template resolution when a template is
     missing from a theme."""
     assert render_template('fallback.html') == 'This is a fallback template.'
-    # assert render_template('use_fallback.html') == (
-    #     'This is a fallback template.'
-    # )
 
 
 def test_filter(app):
