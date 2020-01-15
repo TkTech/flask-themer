@@ -235,7 +235,6 @@ def serve_static(theme, filename):
     try:
         t = themer.themes[theme]
     except KeyError:
-        print('hmm')
         abort(404)
 
     return t.theme_loader.get_static(theme, filename)
