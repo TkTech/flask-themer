@@ -9,9 +9,10 @@ Simple theme support for flask apps.
 
 Flask-Themer is inspired by the (seemingly) abandoned [flask-themes][] project,
 but has been written from scratch for py3.7+ (or 3.6 with the dataclasses
-backport). However it is _not_ compatible immediately compatible with
-flask-themes and does not seek to be. Flask-Themer tries to have little opinion
-on how you actually structure your project and its themes.
+backport). However it is _not_ immediately compatible with flask-themes and
+does not seek to be. Flask-Themer tries to have little opinion on how you
+actually structure your project and its themes and does not require a
+particular metadata format/file.
 
 Flask-Themer releases follow [Semantic Versioning][semver].
 Flask-Themer has 100% test coverage and considers it an error to fall below
