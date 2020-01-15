@@ -28,4 +28,4 @@ jobs:
     - name: Check types with mypy
       run: |
         pip install mypy
-        mypy flask-themer.py
+        mypy flask_themer.py
