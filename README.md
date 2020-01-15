@@ -1,6 +1,6 @@
 ![PyPI](https://img.shields.io/pypi/v/flask-themer?style=flat-square)
 ![PyPI - License](https://img.shields.io/pypi/l/flask-themer?style=flat-square)
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/tktech/flask-themer/test?style=flat-square)
+![GitHub Workflow Status](https://img.shields.io/github/workflow/status/TkTech/flask-themer/Run tests?style=flat-square)
 
 
 # Flask-Themer
