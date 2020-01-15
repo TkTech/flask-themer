@@ -135,12 +135,13 @@ class ZipFileThemeLoader(ThemeLoader):
     def __init__(self, path_to_zip):
         self.archive = ZipFile(path_to_zip)
 
+    @property
     def themes(self):
-        return {'my_dumb_theme': Theme(
+        yield Theme(
             name='my_dumb_theme',
             theme_loader=self,
             jinja_loader=ZipFileTemplateLoader(archive=self.archive),
-        )}
+        )
 
     def get_static(self, theme, path):
         return self.archive.read(path)

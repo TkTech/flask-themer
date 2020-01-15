@@ -46,6 +46,7 @@ class Theme:
 
 
 class ThemeLoader:
+    @property
     def themes(self) -> Iterable[Theme]:
         """
         Return a dict mapping theme names to `Theme` instances.
@@ -69,6 +70,7 @@ class FileSystemThemeLoader(ThemeLoader):
         self.path = Path(path)
         self._filter = filter
 
+    @property
     def themes(self):
         themes = {}
         if self.path.exists():
@@ -79,7 +81,7 @@ class FileSystemThemeLoader(ThemeLoader):
                 if self._filter and not self._filter(child):
                     continue
 
-                themes[child.name] = Theme(
+                yield Theme(
                     jinja_loader=FileSystemLoader(str(child)),
                     theme_loader=self,
                     name=child.name
@@ -119,7 +121,8 @@ class Themer:
         ]
 
         for loader in self.loaders:
-            self.themes.update(loader.themes())
+            for theme in loader.themes:
+                self.themes[theme.name] = theme
 
     def current_theme_loader(self, loader):
         """Set the resolver to use when looking up the currently active

@@ -61,7 +61,7 @@ def test_interface():
     loader = ThemeLoader()
 
     with pytest.raises(NotImplementedError):
-        loader.themes()
+        loader.themes
 
     with pytest.raises(NotImplementedError):
         loader.get_static('', '')
