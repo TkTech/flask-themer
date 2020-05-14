@@ -75,7 +75,7 @@ def test_static(app):
 
     with app.test_client() as client:
         rv = client.get(static_route)
-        assert rv.data == b'This is a static asset test.\r\n'
+        assert rv.data.strip() == b'This is a static asset test.'
 
         rv = client.get('http://testing/static/fake_theme/fake.txt')
         assert rv.status_code == 404
