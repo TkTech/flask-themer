@@ -8,7 +8,8 @@ from flask_themer import (
     MAGIC_PATH_PREFIX,
     render_template,
     NoThemeResolver,
-    ThemerNotInitialized
+    ThemerNotInitialized,
+    use_theme
 )
 
 
@@ -58,3 +59,30 @@ def test_not_setup():
     with app.app_context():
         with pytest.raises(ThemerNotInitialized):
             render_template('test.html')
+
+
+def test_use_theme(app):
+    """Ensure we can override themes temporarily using use_theme."""
+    themer: Themer = app.extensions[EXTENSION_KEY]
+    themer.current_theme_loader(lambda: 'test_theme')
+
+    assert themer.current_theme == 'test_theme'
+
+    # Ensure use_theme overrides the normal loader. Ensure nested use_theme
+    # calls work as expected.
+    with use_theme('test_use'):
+        assert themer.current_theme == 'test_use'
+
+        with use_theme('test_2nd_use'):
+            assert themer.current_theme == 'test_2nd_use'
+
+        assert themer.current_theme == 'test_use'
+
+    # Ensure exceptions are not suppressed, and the theme stack is popped even
+    # on errors.
+    with pytest.raises(ValueError):
+        with use_theme('raises'):
+            raise ValueError
+
+    # Ensure nothing is left after every manager has closed.
+    assert len(themer._explicit_theme_stack) == 0

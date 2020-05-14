@@ -1,6 +1,7 @@
 from pathlib import Path
 from dataclasses import dataclass, field
 from typing import Iterable, Callable, Union
+from contextlib import contextmanager
 
 from flask import render_template as flask_render_template
 from flask import current_app, Blueprint, url_for, send_from_directory, abort
@@ -98,6 +99,7 @@ class Themer:
         self.loaders = []
         self.themes = {}
         self._theme_resolver = None
+        self._explicit_theme_stack = []
 
         if app is not None:
             self.init_app(app, loaders=loaders)
@@ -142,6 +144,9 @@ class Themer:
     @property
     def current_theme(self):
         """The currently active theme."""
+        if self._explicit_theme_stack:
+            return self._explicit_theme_stack[-1]
+
         if not self._theme_resolver:
             raise NoThemeResolver(
                 'No current theme resolver is registered, set one using '
@@ -177,6 +182,18 @@ def lookup_static_theme_path(path, **kwargs):
         filename=path,
         **kwargs
     )
+
+
+@contextmanager
+def use_theme(theme):
+    """Temporarily override the theme."""
+    themer = _current_themer()
+
+    try:
+        themer._explicit_theme_stack.append(theme)
+        yield
+    finally:
+        themer._explicit_theme_stack.pop()
 
 
 def _current_themer() -> Themer:
