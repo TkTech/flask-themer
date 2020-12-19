@@ -71,13 +71,13 @@ def test_static(app):
     """Ensure we can get a static file from the theme or fail reasonably if
     it's missing."""
     static_route = lookup_static_theme_path('static.txt')
-    assert static_route == 'http://testing/static/test_theme/static.txt'
+    assert static_route == 'http://testing/_theme/test_theme/static.txt'
 
     with app.test_client() as client:
         rv = client.get(static_route)
         assert rv.data.strip() == b'This is a static asset test.'
 
-        rv = client.get('http://testing/static/fake_theme/fake.txt')
+        rv = client.get('http://testing/_theme/fake_theme/fake.txt')
         assert rv.status_code == 404
 
 

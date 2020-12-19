@@ -38,7 +38,7 @@ def test_static_path(app):
         filename='testing.static',
         _scheme='http',
         _external=True
-    ) == 'http://testing/static/testing/testing.static'
+    ) == 'http://testing/_theme/testing/testing.static'
 
 
 def test_no_resolver(app):
