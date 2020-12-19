@@ -248,7 +248,7 @@ theme_blueprint = Blueprint(
 setattr(theme_blueprint, 'jinja_loader', _ThemeTemplateLoader())
 
 
-@theme_blueprint.route('/static/<theme>/<path:filename>', endpoint='static')
+@theme_blueprint.route('/_theme/<theme>/<path:filename>', endpoint='static')
 def serve_static(theme, filename):
     themer = _current_themer()
 
