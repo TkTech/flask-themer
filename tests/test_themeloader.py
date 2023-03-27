@@ -43,6 +43,12 @@ def test_fallback(app):
     assert render_template('fallback.html') == 'This is a fallback template.'
 
 
+def test_inheritance(app):
+    """Ensure themes can inherit from other themes."""
+    with app.app_context():
+        assert render_template('inheritance.html') == "This is rendered in other_test_theme."
+
+
 def test_filter(app):
     """Ensure we can filter directories."""
     app = Flask('testing')
@@ -79,6 +85,16 @@ def test_static(app):
 
         rv = client.get('http://testing/_theme/fake_theme/fake.txt')
         assert rv.status_code == 404
+
+
+def test_static_inherintance(app):
+    """Ensure static files can be loaded from a given theme."""
+    static_route = lookup_static_theme_path('static.txt', theme="other_test_theme")
+    assert static_route == 'http://testing/_theme/other_test_theme/static.txt'
+
+    with app.test_client() as client:
+        rv = client.get(static_route)
+        assert rv.data.strip() == b'This is a static asset test from \'other_test_theme\'.'
 
 
 def test_bad_template_path(app):

@@ -104,6 +104,13 @@ path that Jinja can use to load it.
 {% endblock %}
 ```
 
+Themes can also extend other themes using the `theme` argument:
+
+```jinja2
+{% extends theme("base.html", theme="my_parent_theme") %}
+```
+
+
 ## Theme Loaders
 
 _Theme_ loaders are the mechanism by which Flask-Themer discovers what themes
