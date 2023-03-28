@@ -1,6 +1,6 @@
 from pathlib import Path
 from dataclasses import dataclass, field
-from typing import Iterable, Callable, Union
+from typing import Iterable, Callable, Optional, Union
 from contextlib import contextmanager
 
 from flask import render_template as flask_render_template
@@ -66,7 +66,7 @@ class FileSystemThemeLoader(ThemeLoader):
     `path` are themes.
     """
     def __init__(self, path: Union[Path, str],
-                 filter: Callable[[Path], bool] = None):
+                 filter: Optional[Callable[[Path], bool]] = None):
         #: The path the loader is searching for themes.
         self.path = Path(path)
         self._filter = filter
