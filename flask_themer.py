@@ -166,19 +166,21 @@ def render_template(path, *args, **kwargs):
         return flask_render_template(path, *args, **kwargs)
 
 
-def lookup_theme_path(path):
+def lookup_theme_path(path, theme=None):
     """Given the path to a template, lookup the "real" path after resolving the
     active theme.
     """
     themer = _current_themer()
-    return f'{MAGIC_PATH_PREFIX}/{themer.current_theme}/{path}'
+    theme = theme or themer.current_theme
+    return f'{MAGIC_PATH_PREFIX}/{theme}/{path}'
 
 
-def lookup_static_theme_path(path, **kwargs):
+def lookup_static_theme_path(path, theme=None, **kwargs):
     themer = _current_themer()
+    theme = theme or themer.current_theme
     return url_for(
         f'{MAGIC_PATH_PREFIX}.static',
-        theme=themer.current_theme,
+        theme=theme,
         filename=path,
         **kwargs
     )
