@@ -5,7 +5,7 @@ with open('README.md', 'r') as fh:
 
 setup(
     name='flask-themer',
-    version='1.4.3',
+    version='2.0.0',
     description='Simple theme mechanism for Flask',
     author='Tyler Kennedy',
     author_email='tk@tkte.ch',
