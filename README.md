@@ -8,11 +8,10 @@
 Simple theme support for flask apps.
 
 Flask-Themer is inspired by the (seemingly) abandoned [flask-themes][] project,
-but has been written from scratch for py3.7+ (or 3.6 with the dataclasses
-backport). However it is _not_ immediately compatible with flask-themes and
-does not seek to be. Flask-Themer tries to have little opinion on how you
-actually structure your project and its themes and does not require a
-particular metadata format/file.
+but has been written from scratch for Python 3.8+. However, it is _not_ immediately
+compatible with flask-themes and does not seek to be. Flask-Themer tries to have
+little opinion on how you actually structure your project and its themes and does
+not require a particular metadata format/file.
 
 Flask-Themer releases follow [Semantic Versioning][semver].
 Flask-Themer has 100% test coverage and considers it an error to fall below
@@ -26,7 +25,7 @@ Install the latest release from [PyPi][]:
 pip install flask-themer
 ```
 
-or get the latest development version from github:
+or get the latest development version from GitHub:
 
 ```
 git clone https://github.com/TkTech/flask-themer.git
@@ -38,7 +37,7 @@ python setup.py develop
 
 
 Flask-Themer usage is usually very basic, and once setup you likely won't need
-to touch it again. Lets do a quickstart. Notice how we import `render_template`
+to touch it again. Let's do a quickstart. Notice how we import `render_template`
 from `flask_themer` instead of `flask`.
 
 
